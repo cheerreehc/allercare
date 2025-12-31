@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import liff from '@line/liff'
-import { ClipboardList, History, Calendar, Bell, ChevronRight, UserCog, CheckCircle2, AlertCircle } from 'lucide-react'
+import { ClipboardList, History, Calendar, Bell, ChevronRight, UserCog, CheckCircle2, AlertCircle, Info } from 'lucide-react'
 
 export default function Dashboard() {
   const router = useRouter()
@@ -62,7 +62,7 @@ export default function Dashboard() {
           <div className="flex items-center gap-3">
             <img src={profilePic} alt="Profile" className="w-12 h-12 rounded-full border-2 border-white/20 shadow-sm" />
             <div>
-              <p className="text-green-100 text-[10px] uppercase tracking-tighter opacity-80">ผู้ป่วย ALLERCARE</p>
+              <p className="text-green-100 text-[10px] uppercase tracking-tighter opacity-80">ALLER CARE -</p>
               <h1 className="text-lg font-bold leading-tight">
                 {userData?.prefix}{userData?.firstName} {userData?.lastName}
               </h1>
@@ -210,8 +210,40 @@ export default function Dashboard() {
           <Calendar size={14} />
           <span className="text-[10px] font-bold uppercase tracking-widest">บันทึกอาการแพ้อื่นๆ</span>
         </Link>
-      </div>
 
+        {/* --- ส่วนคำแนะนำในการดูแลตนเอง (อ้างอิงตามเอกสารแพทย์) --- */}
+        <div className="mt-8 px-2">
+          <div className="flex items-center gap-2 mb-4 text-slate-800">
+            <div className="bg-blue-100 p-1.5 rounded-lg text-blue-600">
+              <Info size={18} />
+            </div>
+            <h3 className="font-bold text-sm">วิธีการดูแลตนเองเมื่อเกิดโรคลมพิษ</h3>
+          </div>
+          
+          <div className="grid grid-cols-1 gap-3">
+            {[
+              { id: 1, text: "หลีกเลี่ยงสาเหตุที่ทำให้เกิดผื่นลมพิษ" },
+              { id: 2, text: "ใช้ยาต้านฮีสตามีนตามสั่งหรือแก้แพ้ชนิดที่ไม่ง่วง เพื่อหลีกเลี่ยงผลข้างเคียง" },
+              { id: 3, text: "ดูแลผิวไม่ให้ผิวแห้ง หมั่นทาครีมหรือโลชั่นที่ไร้น้ำหอม เพื่อลดความไวของผิวหนัง" },
+              { id: 4, text: "หลีกเลี่ยงการกระตุ้นผิวหนัง เช่น แกะเกา ขีดข่วน ใส่เสื้อรัด เสียดสี สะพายของหนัก เป็นต้น" }
+            ].map((item) => (
+              <div key={item.id} className="bg-white p-4 rounded-2xl border border-slate-100 flex gap-3 shadow-sm items-start">
+                <span className="bg-blue-50 text-blue-500 font-bold text-[10px] w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5">
+                  {item.id}
+                </span>
+                <p className="text-xs text-slate-600 leading-relaxed font-medium">
+                  {item.text}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          <p className="text-[9px] text-slate-400 mt-4 text-center italic tracking-tight">
+            *อ้างอิงจากแนวทางการดูแลรักษาโรคลมพิษ 2557
+          </p>
+        </div>
+      </div>
     </div>
+
   )
 }
