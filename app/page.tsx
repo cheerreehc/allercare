@@ -21,6 +21,13 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('status') === 'success') {
+      alert('บันทึกข้อมูลอาการวันนี้เรียบร้อยแล้วค่ะ!');
+      // เคลียร์ url ให้สวยงาม
+      window.history.replaceState({}, '', '/');
+    }
+    
     const initApp = async () => {
       try {
         await liff.ready

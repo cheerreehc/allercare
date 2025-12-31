@@ -5,20 +5,17 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const userId = searchParams.get('id');
 
-  if (!userId) {
-    return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
-  }
+  if (!userId) return NextResponse.json({ logs: [] });
 
   try {
     const logs = await prisma.dailyLog.findMany({
       where: { userId: userId },
       orderBy: { logDate: 'desc' },
-      take: 7, // ดึงเฉพาะ 7 วันล่าสุดตามมาตรฐาน UAS7
+      take: 7, // ดึง 7 วันล่าสุดสำหรับ UAS7
     });
 
     return NextResponse.json({ logs });
   } catch (error) {
-    console.error('Database Error:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json({ logs: [], error: "Failed to fetch" });
   }
 }
