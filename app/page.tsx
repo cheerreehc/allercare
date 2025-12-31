@@ -74,39 +74,62 @@ export default function Dashboard() {
           </button>
         </div>
 
-        {/* Dashboard Card */}
-        <div className="bg-white/10 backdrop-blur-md rounded-[2rem] p-5 border border-white/20">
-          <div className="flex justify-between items-center mb-4">
+        {/* Dashboard Card - เปลี่ยนเป็นสีขาวทึบเพื่อให้ตัวหนังสือชัดเจน */}
+        <div className="bg-white rounded-[2.5rem] p-6 shadow-xl shadow-green-900/20 text-slate-800">
+          <div className="flex justify-between items-start mb-4">
             <div>
-              <p className="text-[10px] text-green-50 opacity-80 uppercase mb-1">ระดับความรุนแรง (UAS7)</p>
-              <h2 className="text-4xl font-black">
-                {details.totalScore} <span className="text-lg font-medium opacity-50">/ 42</span>
-              </h2>
-              {/* ส่วนแปลผล */}
-              <p className="text-[11px] font-bold mt-1 px-2 py-0.5 rounded-full bg-white/20 inline-block">
-                {details.totalScore >= 28 ? "🔴 อาการรุนแรง" : 
-                details.totalScore >= 16 ? "🟠 อาการปานกลาง" :
-                details.totalScore >= 1 ? "🟡 อาการเล็กน้อย" : "🟢 คุมอาการได้ดี"}
+              <p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider mb-1">
+                ระดับความรุนแรง (UAS7)
               </p>
-            </div>
-            <div className="text-center">
-              <div className="h-10 w-10 rounded-xl bg-white flex items-center justify-center text-green-600 font-bold text-sm shadow-sm">
-                D-{details.dayCount}
+              <div className="flex items-baseline gap-1">
+                <h2 className="text-4xl font-black text-slate-800">{details.totalScore}</h2>
+                <span className="text-lg font-medium text-slate-300">/ 42</span>
               </div>
-              <p className="text-[8px] mt-1 opacity-60">จำนวนวันที่บันทึก</p>
+              
+              {/* ส่วนแปลผลตามมาตรฐานแพทย์ */}
+              <div className="mt-2 flex items-center gap-1.5">
+                <div className={`w-2 h-2 rounded-full ${
+                  details.totalScore >= 28 ? "bg-red-500" : 
+                  details.totalScore >= 16 ? "bg-orange-500" :
+                  details.totalScore >= 1 ? "bg-yellow-500" : "bg-green-500"
+                }`}></div>
+                <p className="text-[11px] font-bold text-slate-600">
+                  {details.totalScore >= 28 ? "อาการรุนแรง (ควรพบแพทย์)" : 
+                  details.totalScore >= 16 ? "อาการปานกลาง" :
+                  details.totalScore >= 1 ? "อาการเล็กน้อย" : "คุมอาการได้ดีมาก"}
+                </p>
+              </div>
+            </div>
+            
+            <div className="bg-green-50 px-3 py-1.5 rounded-2xl text-center">
+              <p className="text-[10px] text-green-600 font-bold leading-none">DAY</p>
+              <p className="text-lg font-black text-green-700 leading-tight">{details.dayCount}</p>
             </div>
           </div>
 
-          {/* แถบวัดระดับความรุนแรง (แทน Progress Bar เดิม) */}
-          <div className="w-full bg-slate-200/30 h-3 rounded-full overflow-hidden mb-5 flex">
-            <div className="h-full bg-green-400" style={{ width: '35%' }}></div> {/* 0-15 */}
-            <div className="h-full bg-orange-400" style={{ width: '30%' }}></div> {/* 16-27 */}
-            <div className="h-full bg-red-500" style={{ width: '35%' }}></div> {/* 28-42 */}
-            {/* เข็มชี้ตำแหน่งคะแนนปัจจุบัน */}
+          {/* แถบเกจวัดความรุนแรง (ยิ่งน้อยยิ่งดี) */}
+          <div className="relative w-full h-3 bg-slate-100 rounded-full overflow-hidden mb-6 flex">
+            <div className="h-full bg-green-400/40 border-r border-white" style={{ width: '35%' }}></div>
+            <div className="h-full bg-yellow-400/40 border-r border-white" style={{ width: '30%' }}></div>
+            <div className="h-full bg-red-400/40" style={{ width: '35%' }}></div>
+            
+            {/* เข็มชี้ตำแหน่งคะแนน */}
             <div 
-              className="absolute h-5 w-1 bg-white shadow-md transform -translate-y-1 transition-all duration-1000"
-              style={{ left: `${(details.totalScore / 42) * 100}%` }}
+              className="absolute top-0 h-full w-1.5 bg-slate-800 rounded-full transition-all duration-1000 shadow-sm"
+              style={{ left: `calc(${(details.totalScore / 42) * 100}% - 3px)` }}
             ></div>
+          </div>
+
+          {/* สถิติเฉลี่ย */}
+          <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-50">
+            <div className="text-left">
+              <p className="text-[9px] text-slate-400 uppercase font-bold mb-0.5">เฉลี่ยผื่น</p>
+              <p className="text-sm font-bold text-slate-700">{details.avgWheal} <span className="text-[10px] font-normal text-slate-400">คะแนน</span></p>
+            </div>
+            <div className="text-left border-l border-slate-100 pl-4">
+              <p className="text-[9px] text-slate-400 uppercase font-bold mb-0.5">เฉลี่ยคัน</p>
+              <p className="text-sm font-bold text-slate-700">{details.avgItch} <span className="text-[10px] font-normal text-slate-400">คะแนน</span></p>
+            </div>
           </div>
         </div>
       </div>
