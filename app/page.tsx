@@ -75,37 +75,38 @@ export default function Dashboard() {
         </div>
 
         {/* Dashboard Card */}
-        <div className="bg-white/10 backdrop-blur-md rounded-[2rem] p-5 border border-white/20 shadow-inner">
+        <div className="bg-white/10 backdrop-blur-md rounded-[2rem] p-5 border border-white/20">
           <div className="flex justify-between items-center mb-4">
             <div>
-              <p className="text-[10px] text-green-50 opacity-80 uppercase tracking-wider mb-1">คะแนนรวม 7 วัน (UAS7)</p>
+              <p className="text-[10px] text-green-50 opacity-80 uppercase mb-1">ระดับความรุนแรง (UAS7)</p>
               <h2 className="text-4xl font-black">
                 {details.totalScore} <span className="text-lg font-medium opacity-50">/ 42</span>
               </h2>
+              {/* ส่วนแปลผล */}
+              <p className="text-[11px] font-bold mt-1 px-2 py-0.5 rounded-full bg-white/20 inline-block">
+                {details.totalScore >= 28 ? "🔴 อาการรุนแรง" : 
+                details.totalScore >= 16 ? "🟠 อาการปานกลาง" :
+                details.totalScore >= 1 ? "🟡 อาการเล็กน้อย" : "🟢 คุมอาการได้ดี"}
+              </p>
             </div>
-            <div className="h-10 w-10 rounded-xl bg-white flex items-center justify-center text-green-600 font-bold shadow-sm text-sm">
-              D-{details.dayCount}
-            </div>
-          </div>
-
-          {/* Progress Bar */}
-          <div className="w-full bg-green-900/20 h-2 rounded-full overflow-hidden mb-5">
-            <div 
-              className="bg-white h-full transition-all duration-1000 ease-out" 
-              style={{ width: `${(Math.min(details.dayCount, 7) / 7) * 100}%` }}
-            ></div>
-          </div>
-
-          {/* สถิติเฉลี่ย */}
-          <div className="grid grid-cols-2 gap-2 pt-4 border-t border-white/10">
             <div className="text-center">
-              <p className="text-[9px] text-green-50 uppercase opacity-60 mb-0.5 font-light">เฉลี่ยจำนวนผื่น</p>
-              <p className="text-sm font-bold">{details.avgWheal} <span className="text-[10px] font-normal opacity-70">คะแนน</span></p>
+              <div className="h-10 w-10 rounded-xl bg-white flex items-center justify-center text-green-600 font-bold text-sm shadow-sm">
+                D-{details.dayCount}
+              </div>
+              <p className="text-[8px] mt-1 opacity-60">จำนวนวันที่บันทึก</p>
             </div>
-            <div className="text-center border-l border-white/10">
-              <p className="text-[9px] text-green-50 uppercase opacity-60 mb-0.5 font-light">เฉลี่ยอาการคัน</p>
-              <p className="text-sm font-bold">{details.avgItch} <span className="text-[10px] font-normal opacity-70">คะแนน</span></p>
-            </div>
+          </div>
+
+          {/* แถบวัดระดับความรุนแรง (แทน Progress Bar เดิม) */}
+          <div className="w-full bg-slate-200/30 h-3 rounded-full overflow-hidden mb-5 flex">
+            <div className="h-full bg-green-400" style={{ width: '35%' }}></div> {/* 0-15 */}
+            <div className="h-full bg-orange-400" style={{ width: '30%' }}></div> {/* 16-27 */}
+            <div className="h-full bg-red-500" style={{ width: '35%' }}></div> {/* 28-42 */}
+            {/* เข็มชี้ตำแหน่งคะแนนปัจจุบัน */}
+            <div 
+              className="absolute h-5 w-1 bg-white shadow-md transform -translate-y-1 transition-all duration-1000"
+              style={{ left: `${(details.totalScore / 42) * 100}%` }}
+            ></div>
           </div>
         </div>
       </div>

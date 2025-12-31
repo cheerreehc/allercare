@@ -93,24 +93,24 @@ export default function HistoryPage() {
             </thead>
             <tbody className="text-sm">
               {logs.length > 0 ? (
-                logs.map((log) => (
-                  <tr key={log.id} className="border-b border-slate-50 last:border-0 hover:bg-slate-50/50 transition-colors">
-                    <td className="py-5 text-slate-500 font-medium">
-                      {new Date(log.logDate).toLocaleDateString('th-TH', { day: '2-digit', month: 'short' })}
-                    </td>
-                    <td className="py-5 text-slate-700 font-semibold">{log.whealScore}</td>
-                    <td className="py-5 text-slate-700 font-semibold">{log.itchScore}</td>
-                    <td className="py-4 bg-green-50/30">
-                      <span className="inline-block px-3 py-1 rounded-full bg-green-100 text-green-700 font-bold text-xs">
-                        {log.totalScore}
-                      </span>
-                    </td>
-                  </tr>
-                ))
+                logs.map((log) => {
+                  // ป้องกันเรื่อง Date คืนค่า Invalid
+                  const dateObj = new Date(log.logDate);
+                  const displayDate = isNaN(dateObj.getTime()) 
+                    ? log.logDate.split('T')[0] // ถ้า Date พัง ให้ตัดเอาแค่ yyyy-mm-dd
+                    : dateObj.toLocaleDateString('th-TH', { day: '2-digit', month: 'short' });
+
+                  return (
+                    <tr key={log.id} className="border-b border-slate-50">
+                      <td className="py-5 text-slate-500 font-medium">{displayDate}</td>
+                      <td className="py-5 text-slate-700 font-semibold">{log.whealScore}</td>
+                      <td className="py-5 text-slate-700 font-semibold">{log.itchScore}</td>
+                      <td className="py-4 bg-green-50/30 font-bold text-green-700">{log.totalScore}</td>
+                    </tr>
+                  );
+                })
               ) : (
-                <tr>
-                  <td colSpan={4} className="py-20 text-slate-300 italic">ยังไม่มีข้อมูลบันทึกใน 7 วันนี้</td>
-                </tr>
+                <tr><td colSpan={4} className="py-20 text-slate-300 italic">ไม่พบข้อมูลประวัติ</td></tr>
               )}
             </tbody>
           </table>
