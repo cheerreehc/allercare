@@ -7,15 +7,24 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id          String     @id // LINE userId
+  name        String
+  hn          String?    // ใส่เครื่องหมาย ? เพื่อให้เป็น Optional ตามหน้าฟอร์ม
+  pdpaConsent Boolean    @default(false)
+  createdAt   DateTime   @default(now())
+  logs        DailyLog[] // ความสัมพันธ์ไปยังตารางบันทึกอาการ
+}
+
 model DailyLog {
-  id        Int      @id @default(autoincrement())
-  userId    String   // LINE User ID
-  logDate   DateTime @db.Date
+  id         Int      @id @default(autoincrement())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id]) // เชื่อมกลับไปที่ User
+  logDate    DateTime @db.Date
   whealScore Int
   itchScore  Int
   totalScore Int
-  triggers   String? // เก็บ text เช่น "อาหารทะเล, ฝุ่น"
-  note       String? @db.Text
+  note       String?  @db.Text
   createdAt  DateTime @default(now())
 
   @@index([userId, logDate])
