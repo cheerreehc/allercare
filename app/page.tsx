@@ -21,6 +21,13 @@ export default function Dashboard() {
   const [profilePic, setProfilePic] = useState<string>('')
   const [isCheckRegis, setIsCheckRegis] = useState(true)
   const [stats, setStats] = useState({ totalScore: 0, currentDay: 0 }); // เพิ่ม State สำหรับเก็บค่าสถิติ
+  // เพิ่ม State สำหรับเก็บ Details
+  const [details, setDetails] = useState({
+    totalScore: 0,
+    dayCount: 0,
+    avgWheal: 0,
+    avgItch: 0
+  });
 
   useEffect(() => {
     const initApp = async () => {
@@ -34,13 +41,20 @@ export default function Dashboard() {
           const res = await fetch(`/api/user/check?id=${profile.userId}`)
           const data = await res.json()
 
-          if (!data.registered) {
-            router.replace('/register')
-          } else {
-            setUserData(data.user)
-            setStats(data.stats); // เก็บค่าคะแนนและจำนวนวัน
-            setIsCheckRegis(false)
-          }
+            if (!data.registered) {
+              router.replace('/register')
+            } else {
+              setUserData(data.user)
+              // ปรับให้ตรงกับชื่อ 'details' ที่ส่งมาจาก API
+              setDetails({
+                totalScore: data.details.totalScore,
+                dayCount: data.details.dayCount,
+                avgWheal: data.details.avgWheal,
+                avgItch: data.details.avgItch
+              }); 
+              setIsCheckRegis(false)
+            }
+
         } else {
           liff.login()
         }
@@ -82,25 +96,39 @@ export default function Dashboard() {
           </button>
         </div>
 
-        {/* แก้ไขส่วนการแสดงคะแนนใน Dashboard */}
-        <div className="bg-white/10 backdrop-blur-md rounded-3xl p-5 border border-white/20">
+        {/* ส่วน Card คะแนนหลักใน return */}
+        <div className="bg-white/10 backdrop-blur-md rounded-3xl p-5 border border-white/20 mb-4">
           <div className="flex justify-between items-center">
             <div>
-              <p className="text-[10px] text-green-100 tracking-wider uppercase">คะแนนรวม 7 วัน (UAS7)</p>
+              <p className="text-[10px] text-green-100 uppercase tracking-wider opacity-80 font-prompt">คะแนนรวม 7 วัน (UAS7)</p>
               <h2 className="text-4xl font-black mt-1 font-prompt">
-                {stats.totalScore} <span className="text-lg font-normal opacity-60">/ 42</span>
+                {details.totalScore} <span className="text-lg font-normal opacity-50">/ 42</span>
               </h2>
             </div>
-            <div className="h-12 w-12 rounded-2xl bg-white flex items-center justify-center text-green-600 font-bold shadow-inner">
-              D-{stats.currentDay || 1}
+            {/* แสดงจำนวนวันที่บันทึกไปแล้ว เช่น D-3 */}
+            <div className="h-12 w-12 rounded-2xl bg-white flex items-center justify-center text-green-600 font-bold shadow-inner border border-green-100 font-prompt">
+              D-{details.dayCount || 0}
             </div>
           </div>
-          {/* Progress Bar แสดงความคืบหน้า 7 วัน */}
+          
+          {/* Progress Bar แสดงความคืบหน้าการบันทึก (0-100%) */}
           <div className="w-full bg-white/20 h-1.5 rounded-full mt-4 overflow-hidden">
             <div 
-              className="bg-white h-full transition-all duration-500" 
-              style={{ width: `${(stats.currentDay / 7) * 100}%` }}
+              className="bg-white h-full transition-all duration-700" 
+              style={{ width: `${(Math.min(details.dayCount, 7) / 7) * 100}%` }}
             ></div>
+          </div>
+
+          {/* Mini Details: ส่วนข้อมูลย่อยแยกตามอาการ */}
+          <div className="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-white/10 font-prompt">
+            <div className="text-center">
+              <p className="text-[9px] text-green-100 uppercase opacity-70">เฉลี่ยจำนวนผื่น</p>
+              <p className="font-bold text-sm text-white">{details.avgWheal} <span className="text-[10px] font-normal opacity-60">คะแนน</span></p>
+            </div>
+            <div className="text-center border-l border-white/10">
+              <p className="text-[9px] text-green-100 uppercase opacity-70">เฉลี่ยอาการคัน</p>
+              <p className="font-bold text-sm text-white">{details.avgItch} <span className="text-[10px] font-normal opacity-60">คะแนน</span></p>
+            </div>
           </div>
         </div>
 

@@ -8,22 +8,26 @@ export async function GET(request: Request) {
 
   if (!userId) return NextResponse.json({ registered: false });
 
-  // ดึงข้อมูล User พร้อมกับสรุปคะแนน 7 วันล่าสุด
   const user = await prisma.user.findUnique({
     where: { id: userId },
     include: {
       logs: {
         orderBy: { logDate: 'desc' },
-        take: 7 // ดึงแค่ 7 วันล่าสุด
+        take: 7 // ดึง 7 วันล่าสุดมาคำนวณ
       }
     }
   });
 
   if (!user) return NextResponse.json({ registered: false });
 
-  // คำนวณคะแนนรวม UAS7 (Wheal + Itch) ของ 7 วันล่าสุด
-  const totalUAS7 = user.logs.reduce((sum, log) => sum + log.totalScore, 0);
-  const dayCount = user.logs.length; // จำนวนวันที่บันทึกไปแล้ว
+  // คำนวณสถิติ
+  const totalScore = user.logs.reduce((sum, log) => sum + log.totalScore, 0);
+  const avgWheal = user.logs.length > 0 
+    ? (user.logs.reduce((sum, log) => sum + log.whealScore, 0) / user.logs.length).toFixed(1) 
+    : 0;
+  const avgItch = user.logs.length > 0 
+    ? (user.logs.reduce((sum, log) => sum + log.itchScore, 0) / user.logs.length).toFixed(1) 
+    : 0;
 
   return NextResponse.json({ 
     registered: true,
@@ -32,9 +36,12 @@ export async function GET(request: Request) {
       firstName: user.firstName,
       lastName: user.lastName,
     },
-    stats: {
-      totalScore: totalUAS7,
-      currentDay: dayCount
+    details: {
+      totalScore,
+      dayCount: user.logs.length,
+      avgWheal,
+      avgItch,
+      lastLog: user.logs[0] || null
     }
   });
 }
