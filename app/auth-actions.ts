@@ -5,16 +5,17 @@ import { redirect } from 'next/navigation'
 
 export type FormState = {
   error?: string;
+  success?: boolean; // เพิ่ม success เข้ามา
 } | null;
 
-export async function registerUser(prevState: FormState, formData: FormData): Promise<FormState | void> {
+// แก้ไข Return Type ให้เป็น Promise<FormState> เท่านั้น (เอา | void ออก)
+export async function registerUser(prevState: FormState, formData: FormData): Promise<FormState> {
   const userId = formData.get('userId') as string
-  const firstName = formData.get('firstName') as string // เพิ่มบรรทัดนี้
-  const lastName = formData.get('lastName') as string   // เพิ่มบรรทัดนี้
+  const firstName = formData.get('firstName') as string
+  const lastName = formData.get('lastName') as string
   const hn = formData.get('hn') as string
   const pdpa = formData.get('pdpa') === 'on'
 
-  // ตอนนี้ TypeScript จะรู้จัก firstName และ lastName แล้วครับ
   if (!userId || !firstName || !lastName || !pdpa) {
     return { error: 'กรุณากรอกชื่อ นามสกุล และยอมรับ PDPA ให้ครบถ้วน' }
   }
@@ -41,5 +42,8 @@ export async function registerUser(prevState: FormState, formData: FormData): Pr
     return { error: 'ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่อีกครั้ง' }
   }
 
+  // หลังจากบันทึกสำเร็จ ให้ redirect ไปหน้าแรก
+  // ใน Next.js การ redirect จะโยน error พิเศษออกมา 
+  // ซึ่งจะทำให้ฟังก์ชันหยุดทำงานและเปลี่ยนหน้าทันที
   redirect('/')
 }
