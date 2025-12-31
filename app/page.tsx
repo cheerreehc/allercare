@@ -62,7 +62,7 @@ export default function Dashboard() {
           <div className="flex items-center gap-3">
             <img src={profilePic} alt="Profile" className="w-12 h-12 rounded-full border-2 border-white/20 shadow-sm" />
             <div>
-              <p className="text-green-100 text-[10px] uppercase tracking-tighter opacity-80">ALLER CARE -</p>
+              <p className="text-green-100 text-[10px] uppercase tracking-tighter opacity-80">ALLER CARE : {userData?.hn}</p>
               <h1 className="text-lg font-bold leading-tight">
                 {userData?.prefix}{userData?.firstName} {userData?.lastName}
               </h1>
