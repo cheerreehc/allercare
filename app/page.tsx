@@ -20,6 +20,7 @@ export default function Dashboard() {
   } | null>(null)
   const [profilePic, setProfilePic] = useState<string>('')
   const [isCheckRegis, setIsCheckRegis] = useState(true)
+  const [stats, setStats] = useState({ totalScore: 0, currentDay: 0 }); // เพิ่ม State สำหรับเก็บค่าสถิติ
 
   useEffect(() => {
     const initApp = async () => {
@@ -37,6 +38,7 @@ export default function Dashboard() {
             router.replace('/register')
           } else {
             setUserData(data.user)
+            setStats(data.stats); // เก็บค่าคะแนนและจำนวนวัน
             setIsCheckRegis(false)
           }
         } else {
@@ -80,19 +82,27 @@ export default function Dashboard() {
           </button>
         </div>
 
-        {/* UAS7 Score Card */}
+        {/* แก้ไขส่วนการแสดงคะแนนใน Dashboard */}
         <div className="bg-white/10 backdrop-blur-md rounded-3xl p-5 border border-white/20">
           <div className="flex justify-between items-center">
             <div>
-              <p className="text-[10px] text-green-100 tracking-wider">คะแนนรวม 7 วัน (UAS7)</p>
-              <h2 className="text-4xl font-black mt-1">0 <span className="text-lg font-normal opacity-60">/ 42</span></h2>
+              <p className="text-[10px] text-green-100 tracking-wider uppercase">คะแนนรวม 7 วัน (UAS7)</p>
+              <h2 className="text-4xl font-black mt-1 font-prompt">
+                {stats.totalScore} <span className="text-lg font-normal opacity-60">/ 42</span>
+              </h2>
             </div>
             <div className="h-12 w-12 rounded-2xl bg-white flex items-center justify-center text-green-600 font-bold shadow-inner">
-              D-1
+              D-{stats.currentDay || 1}
             </div>
           </div>
+          {/* Progress Bar แสดงความคืบหน้า 7 วัน */}
+          <div className="w-full bg-white/20 h-1.5 rounded-full mt-4 overflow-hidden">
+            <div 
+              className="bg-white h-full transition-all duration-500" 
+              style={{ width: `${(stats.currentDay / 7) * 100}%` }}
+            ></div>
+          </div>
         </div>
-      </div>
 
       {/* เมนูหลัก */}
       <div className="p-6 -mt-4 space-y-4">
@@ -121,5 +131,6 @@ export default function Dashboard() {
         </div>
       </div>
     </div>
-  )
+    </div>
+    )
 }
