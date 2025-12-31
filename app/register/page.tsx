@@ -61,23 +61,32 @@ export default function RegisterPage() {
         )}
 
         <div className="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 space-y-4">
-          <div>
-            <label className="text-[10px] font-bold text-slate-400 uppercase mb-1 block ml-1">ชื่อ - นามสกุล</label>
+        <div>
+            <label className="text-[10px] font-bold text-slate-400 uppercase mb-1 block ml-1">ชื่อต้น (First Name) *</label>
             <input 
-              name="name" 
-              placeholder="ระบุชื่อ-นามสกุล" 
-              required 
-              className="w-full p-3 rounded-xl bg-slate-50 border border-slate-100 focus:ring-2 focus:ring-green-500 outline-none text-sm"
+            name="firstName" 
+            placeholder="ระบุชื่อจริง" 
+            required 
+            className="w-full p-3 rounded-xl bg-slate-50 border border-slate-100 focus:ring-2 focus:ring-green-500 outline-none text-sm"
             />
-          </div>
-          <div>
+        </div>
+        <div>
+            <label className="text-[10px] font-bold text-slate-400 uppercase mb-1 block ml-1">นามสกุล (Last Name) *</label>
+            <input 
+            name="lastName" 
+            placeholder="ระบุนามสกุล" 
+            required 
+            className="w-full p-3 rounded-xl bg-slate-50 border border-slate-100 focus:ring-2 focus:ring-green-500 outline-none text-sm"
+            />
+        </div>
+        <div>
             <label className="text-[10px] font-bold text-slate-400 uppercase mb-1 block ml-1">เลขประจำตัวผู้ป่วย (HN)</label>
             <input 
-              name="hn" 
-              placeholder="เลข HN (ถ้าทราบ)" 
-              className="w-full p-3 rounded-xl bg-slate-50 border border-slate-100 focus:ring-2 focus:ring-green-500 outline-none text-sm"
+            name="hn" 
+            placeholder="เลข HN (ถ้าทราบ)" 
+            className="w-full p-3 rounded-xl bg-slate-50 border border-slate-100 focus:ring-2 focus:ring-green-500 outline-none text-sm"
             />
-          </div>
+        </div>
         </div>
 
         <div className="bg-white p-5 rounded-3xl shadow-sm border border-slate-100">

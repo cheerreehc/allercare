@@ -9,11 +9,12 @@ datasource db {
 
 model User {
   id          String     @id // LINE userId
-  name        String
-  hn          String?    // ใส่เครื่องหมาย ? เพื่อให้เป็น Optional ตามหน้าฟอร์ม
+  firstName   String     // ชื่อต้น
+  lastName    String     // นามสกุล
+  hn          String?    // HN ยังคงเป็น Optional ได้ (เผื่อผู้ป่วยใหม่ยังไม่มี)
   pdpaConsent Boolean    @default(false)
   createdAt   DateTime   @default(now())
-  logs        DailyLog[] // ความสัมพันธ์ไปยังตารางบันทึกอาการ
+  logs        DailyLog[]
 }
 
 model DailyLog {

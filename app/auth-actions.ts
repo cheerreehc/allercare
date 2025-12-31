@@ -14,20 +14,19 @@ export async function registerUser(prevState: FormState, formData: FormData): Pr
   const hn = formData.get('hn') as string
   const pdpa = formData.get('pdpa') === 'on'
 
-  if (!userId || !name || !pdpa) {
-    return { error: 'กรุณากรอกข้อมูลให้ครบถ้วนและยอมรับเงื่อนไข' }
+  // บังคับกรอกชื่อและนามสกุล
+  if (!userId || !firstName || !lastName || !pdpa) {
+    return { error: 'กรุณากรอกชื่อ นามสกุล และยอมรับ PDPA ให้ครบถ้วน' }
   }
 
   try {
     await prisma.user.upsert({
       where: { id: userId },
-      update: { name, hn, pdpaConsent: pdpa },
-      create: { id: userId, name, hn, pdpaConsent: pdpa }
+      update: { firstName, lastName, hn, pdpaConsent: pdpa },
+      create: { id: userId, firstName, lastName, hn, pdpaConsent: pdpa }
     })
   } catch (err) {
-    console.error(err)
-    return { error: 'ไม่สามารถบันทึกข้อมูลลงฐานข้อมูลได้' }
+    return { error: 'ไม่สามารถบันทึกข้อมูลได้' }
   }
-
   redirect('/')
 }
