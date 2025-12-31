@@ -4,6 +4,7 @@
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
+import { startOfDay, endOfDay } from 'date-fns' // แนะนำให้ลง npm install date-fns
 
 export async function createLog(prevState: any, formData: FormData) {
   // 1. รับค่า userId จริงจากฟอร์ม (ที่ส่งมาจาก LIFF)
@@ -19,28 +20,42 @@ export async function createLog(prevState: any, formData: FormData) {
   }
 
   // 3. รับคะแนนและคำนวณ
-  const whealScore = Number(formData.get('wheals')) // เช็คหน้า page.tsx ว่าตั้งชื่อ name="wheals" หรือไม่
-  const itchScore = Number(formData.get('itch'))
+  const wheals = parseInt(formData.get('wheals') as string)
+  const itch = parseInt(formData.get('itch') as string)
   const note = formData.get('note') as string
-  const totalScore = whealScore + itchScore
+  const totalScore = wheals + itch
+
+  const today = new Date()
+  const normalizedDate = startOfDay(today) // จะได้เวลา 00:00:00.000
 
   // 4. บันทึกลง MySQL
   try {
-    await prisma.dailyLog.create({
-      data: {
-        userId: userId,
-        logDate: new Date(), 
-        whealScore: whealScore,
-        itchScore: itchScore,
-        totalScore: totalScore,
-        note: note,
+    await prisma.dailyLog.upsert({
+      where: {
+        userId_logDate: {
+          userId: userId,
+          logDate: normalizedDate 
+        }
       },
-    })
-  } catch (error) {
-    console.error("Database Error:", error)
-    return { error: "ไม่สามารถบันทึกข้อมูลได้" }
-  }
-
+          update: {
+            whealScore: wheals,
+            itchScore: itch,
+            totalScore: totalScore,
+            note: note
+          },
+        create: {
+          userId: userId,
+          logDate: startOfDay(today),
+          whealScore: wheals,
+          itchScore: itch,
+          totalScore: totalScore,
+          note: note
+        }
+      })
+      return { success: true }
+    } catch (e) {
+      return { error: "บันทึกข้อมูลไม่สำเร็จ" }
+    }
   // 5. บันทึกเสร็จ เคลียร์ Cache และไปหน้าประวัติ
   revalidatePath('/history')
   revalidatePath('/') // เคลียร์หน้า Dashboard ด้วยเพื่อให้คะแนนอัปเดต

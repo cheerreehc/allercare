@@ -20,15 +20,16 @@ model User {
 }
 
 model DailyLog {
-  id         Int      @id @default(autoincrement())
-  userId     String
-  user       User     @relation(fields: [userId], references: [id]) // เชื่อมกลับไปที่ User
-  logDate    DateTime @db.Date
-  whealScore Int
-  itchScore  Int
-  totalScore Int
-  note       String?  @db.Text
-  createdAt  DateTime @default(now())
+id          Int      @id @default(autoincrement())
+  userId      String
+  logDate     DateTime @db.Date // แนะนำให้ใช้ @db.Date เพื่อให้เก็บแค่วันที่ ไม่ติดเรื่องเวลา
+  whealScore  Int
+  itchScore   Int
+  totalScore  Int
+  note        String?  @db.Text
+  createdAt   DateTime @default(now())
 
-  @@index([userId, logDate])
+  user        User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, logDate])
 }
