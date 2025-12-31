@@ -12,77 +12,84 @@ export default function Dashboard() {
   const [profilePic, setProfilePic] = useState<string>('')
   const [isCheckRegis, setIsCheckRegis] = useState(true) // ใช้สำหรับ Loading หน้าจอขณะเช็คข้อมูล
 
+  export default function Dashboard() {
+  const router = useRouter()
+  // สร้าง State สำหรับเก็บข้อมูลผู้ป่วยจากฐานข้อมูล
+  const [userData, setUserData] = useState<{
+    prefix: string;
+    firstName: string;
+    lastName: string;
+  } | null>(null)
+  const [profilePic, setProfilePic] = useState<string>('')
+  const [loading, setLoading] = useState(true)
+
   useEffect(() => {
-    const initAndCheckUser = async () => {
+    const initApp = async () => {
       try {
         await liff.ready;
         if (liff.isLoggedIn()) {
           const profile = await liff.getProfile()
-          setDisplayName(profile.displayName)
           setProfilePic(profile.pictureUrl || '')
 
-          // 1. เช็คสถานะการลงทะเบียนจาก API
+          // เช็คสถานะการลงทะเบียนและดึงข้อมูลผู้ใช้
           const res = await fetch(`/api/user/check?id=${profile.userId}`)
           const data = await res.json()
 
-          // 2. ถ้ายังไม่ลงทะเบียน ให้ดีดไปหน้า Register
           if (!data.registered) {
             router.replace('/register')
           } else {
-            setIsCheckRegis(false) // ลงทะเบียนแล้ว ให้แสดงหน้า Dashboard
+            // เก็บข้อมูลที่ได้จาก API (ซึ่งต้องแก้ API ให้ส่งชื่อกลับมาด้วย)
+            setUserData(data.user) 
+            setLoading(false)
           }
         } else {
           liff.login()
         }
       } catch (error) {
-        console.error('LIFF Init Error:', error)
+        console.error('Error:', error)
       }
     }
-    initAndCheckUser()
+    initApp()
   }, [router])
 
-  // ขณะกำลังเช็คข้อมูลให้แสดงหน้า Loading สวยๆ
-  if (isCheckRegis) {
+  if (loading) {
     return (
-      <div className="max-w-md mx-auto min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 text-center">
-        <div className="w-12 h-12 border-4 border-green-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-        <p className="text-slate-500 font-prompt text-sm">กำลังเตรียมข้อมูลสุขภาพของคุณ...</p>
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center font-prompt">
+        <div className="animate-pulse text-slate-400 text-sm">กำลังโหลดข้อมูลสุขภาพ...</div>
       </div>
     )
   }
 
   return (
     <div className="max-w-md mx-auto min-h-screen bg-slate-50">
-      {/* ส่วนบน: Profile & Summary */}
-      <div className="bg-gradient-to-br from-green-500 to-green-600 text-white p-8 rounded-b-[2.5rem] shadow-lg">
+      {/* Header ส่วนบน */}
+      <div className="bg-gradient-to-br from-green-600 to-green-700 text-white p-8 rounded-b-[2.5rem] shadow-lg">
         <div className="flex justify-between items-start mb-6">
           <div className="flex items-center gap-3">
-            {profilePic && (
-              <img src={profilePic} alt="Profile" className="w-12 h-12 rounded-full border-2 border-white/50" />
-            )}
+            <img src={profilePic} alt="Profile" className="w-12 h-12 rounded-full border-2 border-white/50" />
             <div>
-              <h1 className="text-xl font-bold font-prompt">สวัสดีครับ {displayName}!</h1>
-              <p className="text-green-100 text-xs opacity-90">วันนี้อาการภูมิแพ้เป็นอย่างไรบ้าง?</p>
+              <p className="text-green-100 text-[10px] uppercase tracking-wider opacity-80">ผู้ป่วยในระบบ AllerCare</p>
+              {/* แสดงชื่อจริงจากฐานข้อมูล */}
+              <h1 className="text-lg font-bold font-prompt">
+                {userData?.prefix}{userData?.firstName} {userData?.lastName}
+              </h1>
             </div>
           </div>
-          <button className="bg-white/20 p-2 rounded-full border border-white/30">
+          <button className="bg-white/20 p-2 rounded-full border border-white/30 active:scale-90">
             <Bell size={20} />
           </button>
         </div>
 
-        {/* คะแนนปัจจุบัน (UAS7 Summary) */}
+        {/* UAS7 Score Card เหมือนเดิม */}
         <div className="bg-white/10 backdrop-blur-md rounded-3xl p-5 border border-white/20">
           <div className="flex justify-between items-center">
             <div>
               <p className="text-[10px] text-green-100 uppercase tracking-wider">คะแนนรวม 7 วัน (UAS7)</p>
-              <h2 className="text-4xl font-black mt-1 font-prompt">0 <span className="text-lg font-normal">/ 42</span></h2>
+              <h2 className="text-4xl font-black mt-1">0 <span className="text-lg font-normal">/ 42</span></h2>
             </div>
-            <div className="h-12 w-12 rounded-2xl bg-white flex items-center justify-center shadow-inner text-green-600 font-bold">
+            <div className="h-12 w-12 rounded-2xl bg-white flex items-center justify-center text-green-600 font-bold shadow-inner">
               D-1
             </div>
-          </div>
-          <div className="w-full bg-white/20 h-2 rounded-full mt-4">
-            <div className="bg-white h-2 rounded-full w-[15%] shadow-[0_0_10px_rgba(255,255,255,0.5)]"></div>
           </div>
         </div>
       </div>
