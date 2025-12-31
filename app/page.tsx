@@ -40,8 +40,8 @@ export default function Dashboard() {
   return (
     <div className="max-w-md mx-auto min-h-screen bg-slate-50 font-prompt">
       
-      {/* --- ส่วนสีเขียว (กรอบสีแดงตามที่คุณต้องการ) --- */}
-      <div className="bg-[#10B981] text-white p-6 pb-10 rounded-b-[3rem] shadow-lg">
+      {/* --- ส่วนสีเขียว --- */}
+      <div className="bg-gradient-to-br from-green-500 to-green-600 text-white p-6 pb-10 mb-6 rounded-b-[3rem] shadow-lg shadow-green-100">
         {/* Profile Section */}
         <div className="flex justify-between items-start mb-6 pt-4">
           <div className="flex items-center gap-3">
