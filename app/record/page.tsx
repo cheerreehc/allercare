@@ -1,118 +1,86 @@
-// src/app/record/page.tsx
 'use client'
 
-import { useState } from 'react'
-import { createLog } from '../actions' // เรียกใช้ฟังก์ชันจากข้อ 2
-import { Send, AlertCircle } from 'lucide-react'
+import { useEffect, useState, useActionState } from 'react'
+import liff from '@line/liff'
+import { createLog } from '../actions' // ปรับ path ให้ตรงกับที่อยู่ไฟล์ actions.ts ของคุณ
+import { ClipboardCheck, Info, AlertCircle } from 'lucide-react'
 
 export default function RecordPage() {
-  const [wheals, setWheals] = useState(0)
-  const [itch, setItch] = useState(0)
-  const totalScore = wheals + itch
+  const [userId, setUserId] = useState<string>('')
+  
+  // แก้ขีดแดง action: ใช้ useActionState เพื่อจัดการสถานะการส่งฟอร์ม
+  const [state, formAction, isPending] = useActionState(createLog, null)
+
+  useEffect(() => {
+    const initLiff = async () => {
+      await liff.ready
+      if (liff.isLoggedIn()) {
+        const profile = await liff.getProfile()
+        setUserId(profile.userId)
+      }
+    }
+    initLiff()
+  }, [])
 
   return (
-    <div className="max-w-md mx-auto min-h-screen bg-slate-50 pb-24">
-      {/* Header */}
-      <div className="bg-green-500 text-white p-6 rounded-b-3xl shadow-sm">
-        <h1 className="text-xl font-bold">บันทึกอาการวันนี้</h1>
-        <p className="text-green-100 text-sm opacity-90">UAS7 Diary • AllerCare</p>
+    <div className="max-w-md mx-auto min-h-screen bg-slate-50 p-6 font-prompt">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="bg-green-500 p-2 rounded-xl text-white">
+          <ClipboardCheck size={24} />
+        </div>
+        <h1 className="text-xl font-bold">บันทึกอาการรายวัน</h1>
       </div>
 
-      <form action={createLog} className="p-5 space-y-6">
-        
-        {/* 1. จำนวนผื่น */}
-        <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
-          <label className="font-semibold text-slate-800 mb-4 block flex items-center gap-2">
-            1. จำนวนผื่นนูนแดง <span className="text-xs text-slate-400 font-normal">(ใน 24 ชม.)</span>
-          </label>
-          
-          <div className="space-y-3">
-            {[
-              { val: 0, label: "ไม่มีผื่น", desc: "ผิวปกติ" },
-              { val: 1, label: "< 20 ผื่น", desc: "เล็กน้อย" },
-              { val: 2, label: "20 - 50 ผื่น", desc: "ปานกลาง" },
-              { val: 3, label: "> 50 ผื่น", desc: "เยอะมาก / เป็นปื้น" },
-            ].map((option) => (
-              <label key={option.val} className={`relative flex items-center justify-between p-4 rounded-xl border-2 cursor-pointer transition-all ${wheals === option.val ? 'border-green-500 bg-green-50' : 'border-slate-100 hover:border-slate-200'}`}>
-                <input 
-                  type="radio" 
-                  name="wheals" 
-                  value={option.val} 
-                  className="sr-only" 
-                  onChange={() => setWheals(option.val)}
-                  checked={wheals === option.val}
-                />
-                <div>
-                  <div className={`font-medium ${wheals === option.val ? 'text-green-700' : 'text-slate-700'}`}>{option.label}</div>
-                  <div className="text-xs text-slate-400">{option.desc}</div>
-                </div>
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${wheals === option.val ? 'bg-green-500 text-white' : 'bg-slate-100 text-slate-400'}`}>
-                  {option.val}
-                </div>
-              </label>
-            ))}
+      <form action={formAction} className="space-y-6">
+        {/* ส่ง userId ไปยัง Server Action */}
+        <input type="hidden" name="userId" value={userId} />
+
+        {state?.error && (
+          <div className="bg-red-50 text-red-600 p-4 rounded-2xl flex items-center gap-2 text-sm border border-red-100">
+            <AlertCircle size={18} />
+            {state.error}
           </div>
+        )}
+
+        <div className="bg-white p-6 rounded-[2.5rem] shadow-sm border border-slate-100 space-y-8">
+          {/* ส่วนของ Input คะแนนผื่นและคัน (Wheals / Itch) ใส่ชื่อ name="wheals" และ name="itch" ให้ตรงกับ action */}
+          <section>
+            <label className="text-sm font-bold text-slate-700 mb-4 block">จำนวนผื่น (Wheals)</label>
+            <select name="wheals" className="w-full p-4 rounded-2xl bg-slate-50 border-none outline-none focus:ring-2 focus:ring-green-500">
+              <option value="0">0: ไม่มีผื่น</option>
+              <option value="1">1: น้อยกว่า 20 จุด / 24 ชม.</option>
+              <option value="2">2: 20-50 จุด / 24 ชม.</option>
+              <option value="3">3: มากกว่า 50 จุด หรือผื่นใหญ่ต่อเนื่อง</option>
+            </select>
+          </section>
+
+          <section>
+            <label className="text-sm font-bold text-slate-700 mb-4 block">ความคัน (Itch Severity)</label>
+            <select name="itch" className="w-full p-4 rounded-2xl bg-slate-50 border-none outline-none focus:ring-2 focus:ring-green-500">
+              <option value="0">0: ไม่คัน</option>
+              <option value="1">1: คันเล็กน้อย (ไม่รบกวนชีวิตประจำวัน)</option>
+              <option value="2">2: คันปานกลาง (รบกวนแต่ไม่กระทบการนอน)</option>
+              <option value="3">3: คันมาก (กระทบการใช้ชีวิตหรือการนอน)</option>
+            </select>
+          </section>
+
+          <section>
+            <label className="text-sm font-bold text-slate-700 mb-2 block">บันทึกเพิ่มเติม</label>
+            <textarea 
+              name="note" 
+              placeholder="ระบุอาการอื่นๆ หรือปัจจัยกระตุ้น (ถ้ามี)"
+              className="w-full p-4 rounded-2xl bg-slate-50 border-none outline-none focus:ring-2 focus:ring-green-500 h-24"
+            />
+          </section>
         </div>
 
-        {/* 2. อาการคัน */}
-        <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
-          <label className="font-semibold text-slate-800 mb-4 block">
-            2. ความรุนแรงอาการคัน
-          </label>
-          
-          <div className="grid grid-cols-4 gap-2">
-             {[0, 1, 2, 3].map((val) => (
-               <label key={val} className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 cursor-pointer transition-all ${itch === val ? 'border-green-500 bg-green-50' : 'border-slate-100'}`}>
-                 <input 
-                    type="radio" 
-                    name="itch" 
-                    value={val} 
-                    className="sr-only" 
-                    onChange={() => setItch(val)} 
-                  />
-                 <span className={`text-xl mb-1 ${itch === val ? 'scale-110' : 'grayscale opacity-50'}`}>
-                   {val === 0 ? '🙂' : val === 1 ? '😐' : val === 2 ? '😣' : '😫'}
-                 </span>
-                 <span className={`text-sm font-bold ${itch === val ? 'text-green-600' : 'text-slate-400'}`}>{val}</span>
-               </label>
-             ))}
-          </div>
-          <p className="text-center text-xs text-slate-400 mt-3">
-            {itch === 0 && "ไม่มีอาการคัน"}
-            {itch === 1 && "คันเล็กน้อย ไม่รำคาญ"}
-            {itch === 2 && "คันปานกลาง รำคาญบ้าง"}
-            {itch === 3 && "คันมาก รบกวนชีวิต/การนอน"}
-          </p>
-        </div>
-
-        {/* Note */}
-        <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
-          <label className="text-sm font-medium text-slate-600 mb-2 block">หมายเหตุ</label>
-          <textarea 
-            name="note" 
-            rows={3} 
-            placeholder="เช่น ทานอาหารทะเล, อากาศร้อน..."
-            className="w-full text-sm p-3 rounded-xl bg-slate-50 border-0 focus:ring-2 focus:ring-green-500 outline-none resize-none"
-          ></textarea>
-        </div>
-
-        {/* Footer Bar */}
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t p-4 flex items-center justify-between max-w-md mx-auto">
-          <div className="flex flex-col">
-             <span className="text-xs text-slate-500">คะแนนรวม</span>
-             <span className={`text-2xl font-bold ${totalScore >= 4 ? 'text-red-500' : 'text-green-500'}`}>
-               {totalScore} <span className="text-sm text-slate-300 font-normal">/ 6</span>
-             </span>
-          </div>
-          <button 
-            type="submit" 
-            className="bg-green-500 hover:bg-green-600 text-white px-8 py-3 rounded-full font-bold shadow-lg shadow-green-200 flex items-center gap-2 transition-transform active:scale-95"
-          >
-            <Send size={18} />
-            บันทึก
-          </button>
-        </div>
-
+        <button 
+          type="submit" 
+          disabled={!userId || isPending}
+          className="w-full bg-slate-900 text-white font-bold py-5 rounded-2xl shadow-xl active:scale-95 disabled:opacity-50 transition-all"
+        >
+          {isPending ? 'กำลังบันทึกข้อมูล...' : 'บันทึกอาการวันนี้'}
+        </button>
       </form>
     </div>
   )

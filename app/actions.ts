@@ -1,35 +1,48 @@
+// src/app/actions.ts
 'use server'
 
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
-export async function createLog(formData: FormData) {
-  // รับค่าจาก Form
-  const rawFormData = {
-    userId: 'U12345678', // TODO: เดี๋ยวเราค่อยมาแก้ให้รับค่าจาก LIFF จริงๆ
-    logDate: new Date(), // บันทึกเป็นวันนี้
-    whealScore: Number(formData.get('wheals')),
-    itchScore: Number(formData.get('itch')),
-    note: formData.get('note') as string,
-  }
-
-  // คำนวณคะแนนรวม
-  const totalScore = rawFormData.whealScore + rawFormData.itchScore
-
-  // บันทึกลง MySQL ผ่าน Prisma
-  await prisma.dailyLog.create({
-    data: {
-      userId: rawFormData.userId,
-      logDate: rawFormData.logDate,
-      whealScore: rawFormData.whealScore,
-      itchScore: rawFormData.itchScore,
-      totalScore: totalScore,
-      note: rawFormData.note,
-    },
+export async function createLog(prevState: any, formData: FormData) {
+  // 1. รับค่า userId จริงจากฟอร์ม (ที่ส่งมาจาก LIFF)
+  const userId = formData.get('userId') as string
+  
+  // 2. ตรวจสอบว่ามี User นี้ในระบบจริงไหม (ป้องกัน Error Foreign Key)
+  const userExists = await prisma.user.findUnique({
+    where: { id: userId }
   })
 
-  // บันทึกเสร็จ ให้รีเฟรชหน้าและเด้งไปหน้าประวัติ
+  if (!userExists) {
+    throw new Error("ไม่พบข้อมูลผู้ใช้งานในระบบ กรุณาลงทะเบียนก่อน")
+  }
+
+  // 3. รับคะแนนและคำนวณ
+  const whealScore = Number(formData.get('wheals')) // เช็คหน้า page.tsx ว่าตั้งชื่อ name="wheals" หรือไม่
+  const itchScore = Number(formData.get('itch'))
+  const note = formData.get('note') as string
+  const totalScore = whealScore + itchScore
+
+  // 4. บันทึกลง MySQL
+  try {
+    await prisma.dailyLog.create({
+      data: {
+        userId: userId,
+        logDate: new Date(), 
+        whealScore: whealScore,
+        itchScore: itchScore,
+        totalScore: totalScore,
+        note: note,
+      },
+    })
+  } catch (error) {
+    console.error("Database Error:", error)
+    return { error: "ไม่สามารถบันทึกข้อมูลได้" }
+  }
+
+  // 5. บันทึกเสร็จ เคลียร์ Cache และไปหน้าประวัติ
   revalidatePath('/history')
+  revalidatePath('/') // เคลียร์หน้า Dashboard ด้วยเพื่อให้คะแนนอัปเดต
   redirect('/history?success=true')
 }
