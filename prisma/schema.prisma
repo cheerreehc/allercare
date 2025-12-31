@@ -1,0 +1,22 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model DailyLog {
+  id        Int      @id @default(autoincrement())
+  userId    String   // LINE User ID
+  logDate   DateTime @db.Date
+  whealScore Int
+  itchScore  Int
+  totalScore Int
+  triggers   String? // เก็บ text เช่น "อาหารทะเล, ฝุ่น"
+  note       String? @db.Text
+  createdAt  DateTime @default(now())
+
+  @@index([userId, logDate])
+}
