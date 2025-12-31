@@ -1,20 +1,20 @@
 'use server'
+
 import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 
-// 1. เพิ่ม export type เพื่อให้หน้า page.tsx เรียกใช้ได้
 export type FormState = {
   error?: string;
 } | null;
 
-// 2. ปรับโครงสร้าง parameter ให้ตรงตามมาตรฐาน Next.js
-export async function registerUser(prevState: FormState, formData: FormData): Promise<FormState> {
+export async function registerUser(prevState: FormState, formData: FormData): Promise<FormState | void> {
   const userId = formData.get('userId') as string
-  const name = formData.get('name') as string
+  const firstName = formData.get('firstName') as string // เพิ่มบรรทัดนี้
+  const lastName = formData.get('lastName') as string   // เพิ่มบรรทัดนี้
   const hn = formData.get('hn') as string
   const pdpa = formData.get('pdpa') === 'on'
 
-  // บังคับกรอกชื่อและนามสกุล
+  // ตอนนี้ TypeScript จะรู้จัก firstName และ lastName แล้วครับ
   if (!userId || !firstName || !lastName || !pdpa) {
     return { error: 'กรุณากรอกชื่อ นามสกุล และยอมรับ PDPA ให้ครบถ้วน' }
   }
@@ -22,11 +22,24 @@ export async function registerUser(prevState: FormState, formData: FormData): Pr
   try {
     await prisma.user.upsert({
       where: { id: userId },
-      update: { firstName, lastName, hn, pdpaConsent: pdpa },
-      create: { id: userId, firstName, lastName, hn, pdpaConsent: pdpa }
+      update: {
+        firstName: firstName,
+        lastName: lastName,
+        hn: hn,
+        pdpaConsent: pdpa
+      },
+      create: {
+        id: userId,
+        firstName: firstName,
+        lastName: lastName,
+        hn: hn,
+        pdpaConsent: pdpa
+      }
     })
   } catch (err) {
-    return { error: 'ไม่สามารถบันทึกข้อมูลได้' }
+    console.error('Registration Error:', err)
+    return { error: 'ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่อีกครั้ง' }
   }
+
   redirect('/')
 }
