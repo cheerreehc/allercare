@@ -8,10 +8,12 @@ datasource db {
 }
 
 model User {
-  id          String     @id // LINE userId
-  firstName   String     // ชื่อต้น
-  lastName    String     // นามสกุล
-  hn          String?    // HN ยังคงเป็น Optional ได้ (เผื่อผู้ป่วยใหม่ยังไม่มี)
+  id          String     @id
+  prefix      String     // คำนำหน้าชื่อ (นาย, นาง, น.ส., เด็กชาย, เด็กหญิง)
+  firstName   String
+  lastName    String
+  gender      String     // เพศ (ชาย, หญิง)
+  hn          String?
   pdpaConsent Boolean    @default(false)
   createdAt   DateTime   @default(now())
   logs        DailyLog[]

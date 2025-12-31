@@ -61,6 +61,22 @@ export default function RegisterPage() {
         )}
 
         <div className="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 space-y-4">
+        {/* คำนำหน้าชื่อ */}
+        <div>
+            <label className="text-[10px] font-bold text-slate-400 uppercase mb-1 block ml-1 tracking-wider">คำนำหน้าชื่อ *</label>
+            <select 
+            name="prefix" 
+            required 
+            className="w-full p-3 rounded-xl bg-slate-50 border border-slate-100 outline-none text-sm appearance-none"
+            >
+            <option value="">เลือกคำนำหน้า</option>
+            <option value="นาย">นาย</option>
+            <option value="นาง">นาง</option>
+            <option value="น.ส.">น.ส.</option>
+            <option value="เด็กชาย">เด็กชาย</option>
+            <option value="เด็กหญิง">เด็กหญิง</option>
+            </select>
+        </div>    
         <div>
             <label className="text-[10px] font-bold text-slate-400 uppercase mb-1 block ml-1">ชื่อต้น (First Name) *</label>
             <input 
@@ -78,6 +94,20 @@ export default function RegisterPage() {
             required 
             className="w-full p-3 rounded-xl bg-slate-50 border border-slate-100 focus:ring-2 focus:ring-green-500 outline-none text-sm"
             />
+        </div>
+        {/* เพศ */}
+        <div>
+            <label className="text-[10px] font-bold text-slate-400 uppercase mb-2 block ml-1">เพศ *</label>
+            <div className="flex gap-4">
+            <label className="flex items-center gap-2 cursor-pointer">
+                <input type="radio" name="gender" value="ชาย" required className="text-green-500 focus:ring-green-500" />
+                <span className="text-sm text-slate-600">ชาย</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+                <input type="radio" name="gender" value="หญิง" required className="text-green-500 focus:ring-green-500" />
+                <span className="text-sm text-slate-600">หญิง</span>
+            </label>
+            </div>
         </div>
         <div>
             <label className="text-[10px] font-bold text-slate-400 uppercase mb-1 block ml-1">เลขประจำตัวผู้ป่วย (HN)</label>
