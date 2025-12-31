@@ -1,21 +1,29 @@
+// src/app/api/user/logs/route.ts
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 
 export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const userId = searchParams.get('id');
-
-  if (!userId) return NextResponse.json({ logs: [] });
-
   try {
+    const { searchParams } = new URL(request.url);
+    const userId = searchParams.get('id');
+
+    if (!userId) {
+      console.log("History API: No UserID provided");
+      return NextResponse.json({ logs: [] });
+    }
+
     const logs = await prisma.dailyLog.findMany({
-      where: { userId: userId },
+      where: { 
+        userId: userId.trim() // ใช้ trim() เพื่อป้องกันช่องว่างที่อาจติดมา
+      },
       orderBy: { logDate: 'desc' },
-      take: 7, // ดึง 7 วันล่าสุดสำหรับ UAS7
+      take: 7,
     });
 
+    console.log(`History API: Found ${logs.length} logs for user ${userId}`);
     return NextResponse.json({ logs });
   } catch (error) {
-    return NextResponse.json({ logs: [], error: "Failed to fetch" });
+    console.error('History API Error:', error);
+    return NextResponse.json({ logs: [], error: "Database Connection Error" });
   }
 }

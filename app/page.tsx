@@ -23,11 +23,12 @@ export default function Dashboard() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get('status') === 'success') {
-      alert('บันทึกข้อมูลอาการวันนี้เรียบร้อยแล้วค่ะ!');
-      // เคลียร์ url ให้สวยงาม
-      window.history.replaceState({}, '', '/');
+      // คุณสามารถใช้ Swal.fire() ถ้าลง sweetalert2 ไว้ หรือ alert ปกติก็ได้ครับ
+      alert('บันทึกข้อมูลวันนี้เรียบร้อยแล้วค่ะ!');
+      // ลบ query string ออกจาก URL เพื่อให้เวลา refresh ไม่เด้ง alert ซ้ำ
+      router.replace('/');
     }
-    
+
     const initApp = async () => {
       try {
         await liff.ready

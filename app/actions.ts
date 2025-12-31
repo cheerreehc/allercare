@@ -4,7 +4,7 @@
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { startOfDay, endOfDay } from 'date-fns' // แนะนำให้ลง npm install date-fns
+import { startOfDay } from 'date-fns'
 
 export async function createLog(prevState: any, formData: FormData) {
   const userId = formData.get('userId') as string
@@ -12,30 +12,46 @@ export async function createLog(prevState: any, formData: FormData) {
   const itch = parseInt(formData.get('itch') as string)
   const note = formData.get('note') as string
   const totalScore = wheals + itch
+  
+  // สำคัญ: ต้องเป็นวันที่ที่ไม่มีเวลามาเกี่ยวข้อง
   const today = startOfDay(new Date())
 
-  let success = false;
+  let isSuccess = false;
 
-  // 4. บันทึกลง MySQL
   try {
     await prisma.dailyLog.upsert({
       where: {
-        userId_logDate: { userId, logDate: today }
+        userId_logDate: {
+          userId: userId,
+          logDate: today
+        }
       },
-      update: { whealScore: wheals, itchScore: itch, totalScore, note },
-      create: { userId, logDate: today, whealScore: wheals, itchScore: itch, totalScore, note }
-    })
-    success = true;
+      update: {
+        whealScore: wheals,
+        itchScore: itch,
+        totalScore: totalScore,
+        note: note
+      },
+      create: {
+        userId: userId,
+        logDate: today,
+        whealScore: wheals,
+        itchScore: itch,
+        totalScore: totalScore,
+        note: note
+      }
+    });
+    isSuccess = true;
   } catch (e) {
-    console.error(e)
-    return { error: "ไม่สามารถบันทึกข้อมูลได้" }
+    console.error("Save Error:", e);
+    return { error: "ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่" };
   }
 
- // ย้าย redirect ออกมานอก try-catch เพื่อความเสถียร
-  if (success) {
+  if (isSuccess) {
+    // ล้าง Cache เพื่อให้หน้า Dashboard และ History เห็นข้อมูลใหม่ทันที
     revalidatePath('/')
     revalidatePath('/history')
-    // ส่งกลับหน้าแรกพร้อมบอกว่าบันทึกสำเร็จ
+    // ดีดกลับไปหน้า Dashboard พร้อมส่งพารามิเตอร์ว่าสำเร็จ
     redirect('/?status=success')
   }
 }
