@@ -26,10 +26,16 @@ export default function HistoryPage() {
         await liff.ready
         if (liff.isLoggedIn()) {
           const profile = await liff.getProfile()
-          // เรียก API ที่เราสร้างไว้
-          const res = await fetch(`/api/user/logs?id=${profile.userId}`)
+          
+          // เพิ่ม timestamp ต่อท้าย url เพื่อป้องกัน Browser จำค่าเก่า (Cache Busting)
+          const res = await fetch(`/api/user/logs?id=${profile.userId}&t=${Date.now()}`)
           const data = await res.json()
-          setLogs(data.logs || [])
+          
+          console.log("Data from API:", data) // ตรวจสอบใน Console ของมือถือ/คอม
+          
+          if (data.logs && Array.isArray(data.logs)) {
+            setLogs(data.logs)
+          }
         }
       } catch (error) {
         console.error('Fetch error:', error)

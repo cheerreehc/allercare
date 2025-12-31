@@ -16,42 +16,24 @@ export async function createLog(prevState: any, formData: FormData) {
   // สำคัญ: ต้องเป็นวันที่ที่ไม่มีเวลามาเกี่ยวข้อง
   const today = startOfDay(new Date())
 
-  let isSuccess = false;
+  let success = false;
 
   try {
     await prisma.dailyLog.upsert({
-      where: {
-        userId_logDate: {
-          userId: userId,
-          logDate: today
-        }
-      },
-      update: {
-        whealScore: wheals,
-        itchScore: itch,
-        totalScore: totalScore,
-        note: note
-      },
-      create: {
-        userId: userId,
-        logDate: today,
-        whealScore: wheals,
-        itchScore: itch,
-        totalScore: totalScore,
-        note: note
-      }
+      where: { userId_logDate: { userId, logDate: today } },
+      update: { whealScore: wheals, itchScore: itch, totalScore, note },
+      create: { userId, logDate: today, whealScore: wheals, itchScore: itch, totalScore, note }
     });
-    isSuccess = true;
+    success = true; // บันทึกสำเร็จ
   } catch (e) {
-    console.error("Save Error:", e);
-    return { error: "ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่" };
+    console.error(e);
+    return { error: "บันทึกไม่สำเร็จ" };
   }
 
-  if (isSuccess) {
-    // ล้าง Cache เพื่อให้หน้า Dashboard และ History เห็นข้อมูลใหม่ทันที
-    revalidatePath('/')
-    revalidatePath('/history')
-    // ดีดกลับไปหน้า Dashboard พร้อมส่งพารามิเตอร์ว่าสำเร็จ
-    redirect('/?status=success')
-  }
+  // ย้าย redirect มาไว้ข้างนอก try-catch เท่านั้น
+    if (success) {
+      revalidatePath('/')
+      revalidatePath('/history')
+      redirect('/?status=success') // เด้งกลับหน้าแรก
+    }
 }

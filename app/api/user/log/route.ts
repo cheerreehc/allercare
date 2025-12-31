@@ -7,23 +7,25 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get('id');
 
-    if (!userId) {
-      console.log("History API: No UserID provided");
-      return NextResponse.json({ logs: [] });
-    }
+    // ถ้าไม่มี id ส่งมา ให้ส่งตารางว่างกลับไป
+    if (!userId) return NextResponse.json({ logs: [] });
 
     const logs = await prisma.dailyLog.findMany({
       where: { 
-        userId: userId.trim() // ใช้ trim() เพื่อป้องกันช่องว่างที่อาจติดมา
+        userId: userId.trim() // ป้องกันช่องว่างที่ติดมาจาก LIFF
       },
-      orderBy: { logDate: 'desc' },
+      orderBy: { 
+        logDate: 'desc' 
+      },
       take: 7,
     });
 
-    console.log(`History API: Found ${logs.length} logs for user ${userId}`);
-    return NextResponse.json({ logs });
+    // ส่งข้อมูลออกไป และบังคับให้เป็น JSON เสมอ
+    return NextResponse.json({ logs }, {
+      headers: { 'Cache-Control': 'no-store' } // บังคับไม่ให้จำ Cache เก่า
+    });
   } catch (error) {
     console.error('History API Error:', error);
-    return NextResponse.json({ logs: [], error: "Database Connection Error" });
+    return NextResponse.json({ logs: [], error: "Internal Server Error" }, { status: 500 });
   }
 }
